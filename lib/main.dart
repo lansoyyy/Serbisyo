@@ -101,7 +101,7 @@ class _MyAppState extends State<MyApp> {
         useMaterial3: true,
       ),
       debugShowCheckedModeBanner: false,
-      initialRoute: '/onboarding',
+      initialRoute: '/splash',
       getPages: [
         GetPage(name: '/onboarding', page: () => const OnboardingScreen()),
         GetPage(name: '/splash', page: () => const SplashScreen()),
