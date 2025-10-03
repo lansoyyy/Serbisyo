@@ -4406,12 +4406,12 @@ class _ProfileTabState extends State<ProfileTab> {
             _buildSupportOption(
               FontAwesomeIcons.envelope,
               'Email Us',
-              'support@hanapraket.com',
+              'support@serbisyo.com',
               Colors.blue,
               () async {
                 Navigator.pop(context);
                 const email =
-                    'mailto:support@hanapraket.com?subject=Support Request';
+                    'mailto:support@serbisyo.com?subject=Support Request';
                 final Uri emailUri = Uri.parse(email);
                 if (await canLaunchUrl(emailUri)) {
                   await launchUrl(emailUri);
@@ -4422,11 +4422,11 @@ class _ProfileTabState extends State<ProfileTab> {
             _buildSupportOption(
               FontAwesomeIcons.facebook,
               'Facebook',
-              'facebook.com/hanapraket',
+              'facebook.com/serbisyo',
               Colors.indigo,
               () async {
                 Navigator.pop(context);
-                const facebookUrl = 'https://facebook.com/hanapraket';
+                const facebookUrl = 'https://facebook.com/serbisyo';
                 final Uri facebookUri = Uri.parse(facebookUrl);
                 if (await canLaunchUrl(facebookUri)) {
                   await launchUrl(facebookUri);
