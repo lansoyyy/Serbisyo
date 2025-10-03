@@ -11,6 +11,7 @@ import '../../../widgets/text_widget.dart';
 import '../../../widgets/touchable_widget.dart';
 import '../../../widgets/app_text_form_field.dart';
 import '../../../widgets/button_widget.dart';
+import '../../../services/preference_service.dart';
 import 'signup_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -33,7 +34,7 @@ class _LoginScreenState extends State<LoginScreen>
 
   bool _isPasswordVisible = false;
   bool _isLoading = false;
-  bool _rememberMe = false;
+  bool _rememberMe = true;
   final GoogleSignIn _googleSignIn = GoogleSignIn();
 
   @override
@@ -66,6 +67,9 @@ class _LoginScreenState extends State<LoginScreen>
       curve: Curves.easeIn,
     ));
 
+    // Load saved credentials if remember me was checked
+    _loadSavedCredentials();
+
     // Start animations
     Future.delayed(const Duration(milliseconds: 300), () {
       _fadeController.forward();
@@ -74,6 +78,24 @@ class _LoginScreenState extends State<LoginScreen>
     Future.delayed(const Duration(milliseconds: 500), () {
       _slideController.forward();
     });
+  }
+
+  void _loadSavedCredentials() {
+    final credentials = PreferenceService.getSavedCredentials();
+    final rememberMe = PreferenceService.getRememberMe();
+    final isLoggedIn = PreferenceService.isLoggedIn();
+
+    print('Login Screen: Loading saved credentials');
+    print('Login Screen: RememberMe=$rememberMe, IsLoggedIn=$isLoggedIn');
+
+    if (credentials != null && rememberMe && isLoggedIn) {
+      _emailController.text = credentials['email'] ?? '';
+      _passwordController.text = credentials['password'] ?? '';
+      _rememberMe = true;
+      print('Login Screen: Credentials loaded');
+    } else {
+      print('Login Screen: No saved credentials to load');
+    }
   }
 
   @override
@@ -96,8 +118,26 @@ class _LoginScreenState extends State<LoginScreen>
       final email = _emailController.text.trim();
       final password = _passwordController.text.trim();
 
+      print(
+          'Login: Attempting sign in with email: $email, rememberMe: $_rememberMe');
+
       await FirebaseAuth.instance
           .signInWithEmailAndPassword(email: email, password: password);
+
+      // Save user session if remember me is checked
+      if (_rememberMe) {
+        print('Login: Saving user session');
+        await PreferenceService.saveUserSession(
+          email: email,
+          password: password,
+          rememberMe: true,
+        );
+        print('Login: User session saved');
+      } else {
+        print('Login: Clearing user session (remember me not checked)');
+        // Clear any previously saved session
+        await PreferenceService.clearUserSession();
+      }
 
       _showSuccessSnackbar('Signed in successfully!');
       Get.offAllNamed('/main');
@@ -206,6 +246,15 @@ class _LoginScreenState extends State<LoginScreen>
             .doc(uid)
             .set(userData, SetOptions(merge: true));
       }
+
+      // Save user session for Google login
+      print('Google Login: Saving user session');
+      await PreferenceService.saveUserSession(
+        email: user.email ?? '',
+        password: 'google_sign_in', // Special password for Google login
+        rememberMe: true,
+      );
+      print('Google Login: User session saved');
 
       _showSuccessSnackbar('Signed in successfully with Google!');
       Get.offAllNamed('/main');
@@ -318,6 +367,15 @@ class _LoginScreenState extends State<LoginScreen>
               .doc(uid)
               .set(userDataFirestore, SetOptions(merge: true));
         }
+
+        // Save user session for Facebook login
+        print('Facebook Login: Saving user session');
+        await PreferenceService.saveUserSession(
+          email: user.email ?? '',
+          password: 'facebook_sign_in', // Special password for Facebook login
+          rememberMe: true,
+        );
+        print('Facebook Login: User session saved');
 
         _showSuccessSnackbar('Signed in successfully with Facebook!');
         Get.offAllNamed('/main');

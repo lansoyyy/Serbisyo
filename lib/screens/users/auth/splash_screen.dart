@@ -129,22 +129,91 @@ class _SplashScreenState extends State<SplashScreen>
     // Navigate to appropriate screen after animations complete
     await Future.delayed(const Duration(milliseconds: 2000));
 
-    // 1) Auto-login if user is still authenticated (wait for initial auth state)
+    // 1) Check for persisted user session and attempt auto-login
+    final autoLoginSuccess = await _attemptAutoLogin();
+    if (autoLoginSuccess) {
+      Get.offAllNamed('/main');
+      return;
+    }
+
+    // 2) Auto-login if user is still authenticated (wait for initial auth state)
     final currentUser = await _resolveInitialUser();
     if (currentUser != null) {
       Get.offAllNamed('/main');
       return;
     }
 
-    // 2) Onboarding gate (only if not logged in)
+    // 3) Onboarding gate (only if not logged in)
     final hasSeenOnboarding = PreferenceService.hasSeenOnboarding();
     if (!hasSeenOnboarding) {
       Get.offAllNamed('/onboarding');
       return;
     }
 
-    // 3) Default to login
+    // 4) Default to login
     Get.offAllNamed('/login');
+  }
+
+  // Attempt auto-login using saved credentials
+  Future<bool> _attemptAutoLogin() async {
+    try {
+      // First check if we have any saved credentials
+      final credentials = PreferenceService.getSavedCredentials();
+      if (credentials == null) {
+        print('Auto-login: No saved credentials found');
+        return false;
+      }
+
+      final email = credentials['email'] ?? '';
+      final password = credentials['password'] ?? '';
+      final rememberMe = PreferenceService.getRememberMe();
+      final isLoggedIn = PreferenceService.isLoggedIn();
+
+      print(
+          'Auto-login: Email=$email, RememberMe=$rememberMe, IsLoggedIn=$isLoggedIn');
+
+      if (email.isEmpty || password.isEmpty) {
+        print('Auto-login: Empty email or password');
+        return false;
+      }
+
+      // Special handling for social logins
+      if (password == 'google_sign_in') {
+        // For Google login, we need to check if user is already authenticated
+        final currentUser = FirebaseAuth.instance.currentUser;
+        if (currentUser != null && currentUser.email == email) {
+          print('Auto-login: Google user already authenticated');
+          return true;
+        } else {
+          print('Auto-login: Google user not authenticated');
+          return false;
+        }
+      } else if (password == 'facebook_sign_in') {
+        // For Facebook login, we need to check if user is already authenticated
+        final currentUser = FirebaseAuth.instance.currentUser;
+        if (currentUser != null && currentUser.email == email) {
+          print('Auto-login: Facebook user already authenticated');
+          return true;
+        } else {
+          print('Auto-login: Facebook user not authenticated');
+          return false;
+        }
+      } else {
+        // For email/password login, attempt to sign in
+        print('Auto-login: Attempting email/password sign in');
+        await FirebaseAuth.instance.signInWithEmailAndPassword(
+          email: email,
+          password: password,
+        );
+        print('Auto-login: Email/password sign in successful');
+        return true;
+      }
+    } catch (e) {
+      // If auto-login fails, clear the saved session to prevent loops
+      print('Auto-login failed: $e');
+      await PreferenceService.clearUserSession();
+      return false;
+    }
   }
 
   // Attempts to resolve the initial Firebase user, waiting briefly for the

@@ -868,7 +868,7 @@ class _SignupScreenState extends State<SignupScreen>
         AppTextFormField(
           controller: _phoneController,
           labelText: 'Enter your phone number',
-          hintText: '+1 (555) 123-4567',
+          hintText: '+639090104355',
           textInputAction: TextInputAction.next,
           keyboardType: TextInputType.phone,
           prefixIcon: Padding(

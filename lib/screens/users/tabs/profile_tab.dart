@@ -10,7 +10,7 @@ import 'dart:io';
 import '../../../utils/colors.dart';
 import '../../../widgets/text_widget.dart';
 import '../../../widgets/touchable_widget.dart';
-
+import '../../../services/preference_service.dart';
 import '../subscreens/faq_screen.dart';
 
 class ProfileTab extends StatefulWidget {
@@ -1086,7 +1086,11 @@ class _ProfileTabState extends State<ProfileTab> {
 
   Future<void> _handleLogout() async {
     try {
+      // Clear persisted user session
+      await PreferenceService.clearUserSession();
+      // Sign out from Firebase
       await FirebaseAuth.instance.signOut();
+      // Navigate to login screen
       Get.offAllNamed('/login');
     } catch (e) {
       if (!mounted) return;

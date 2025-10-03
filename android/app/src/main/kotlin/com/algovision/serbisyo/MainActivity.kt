@@ -17,8 +17,21 @@ class MainActivity: FlutterActivity() {
     
     private fun printKeyHash() {
         try {
-            val info = packageManager.getPackageInfo("com.algovision.serbisyo", PackageManager.GET_SIGNATURES)
-            for (signature in info.signatures) {
+            val packageInfo = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
+                packageManager.getPackageInfo("com.algovision.serbisyo", PackageManager.GET_SIGNING_CERTIFICATES)
+            } else {
+                @Suppress("DEPRECATION")
+                packageManager.getPackageInfo("com.algovision.serbisyo", PackageManager.GET_SIGNATURES)
+            }
+            
+            val signatures = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
+                packageInfo.signingInfo?.apkContentsSigners
+            } else {
+                @Suppress("DEPRECATION")
+                packageInfo.signatures
+            }
+            
+            signatures?.forEach { signature ->
                 val md = MessageDigest.getInstance("SHA")
                 md.update(signature.toByteArray())
                 val hash = Base64.encodeToString(md.digest(), Base64.DEFAULT)
