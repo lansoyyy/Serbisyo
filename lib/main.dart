@@ -8,10 +8,6 @@ import 'package:hanap_raket/screens/users/auth/onboarding_screen.dart';
 import 'package:hanap_raket/screens/users/auth/login_screen.dart';
 import 'package:hanap_raket/screens/users/auth/signup_screen.dart';
 
-import 'package:hanap_raket/screens/providers/provider_main_screen.dart';
-import 'package:hanap_raket/screens/providers/auth/provider_login_screen.dart';
-import 'package:hanap_raket/screens/providers/auth/provider_signup_screen.dart';
-import 'package:hanap_raket/screens/providers/auth/provider_application_processing_screen.dart';
 import 'package:hanap_raket/screens/force_update_screen.dart';
 import 'package:hanap_raket/screens/admin/firebase_init_screen.dart';
 import 'utils/colors.dart';
@@ -105,7 +101,6 @@ class _MyAppState extends State<MyApp> {
         useMaterial3: true,
       ),
       debugShowCheckedModeBanner: false,
-      // initialRoute: '/provider-login',
       initialRoute: '/login',
       getPages: [
         GetPage(name: '/onboarding', page: () => const OnboardingScreen()),
@@ -113,14 +108,6 @@ class _MyAppState extends State<MyApp> {
         GetPage(name: '/login', page: () => const LoginScreen()),
         GetPage(name: '/signup', page: () => const SignupScreen()),
         GetPage(name: '/main', page: () => const MainScreen()),
-        GetPage(name: '/provider-main', page: () => const ProviderMainScreen()),
-        GetPage(
-            name: '/provider-login', page: () => const ProviderLoginScreen()),
-        GetPage(
-            name: '/provider-signup', page: () => const ProviderSignupScreen()),
-        GetPage(
-            name: '/provider-application-processing',
-            page: () => const ProviderApplicationProcessingScreen()),
         GetPage(name: '/firebase-init', page: () => const FirebaseInitScreen()),
       ],
     );
